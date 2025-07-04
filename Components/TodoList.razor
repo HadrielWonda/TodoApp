@@ -1,0 +1,80 @@
+@using TodoApp.Services
+@inject TodoService TodoService
+@implements IDisposable
+
+<div class="todo-container">
+    <div class="todo-header">
+        <input @bind="newTodoTitle" 
+               @onkeypress="HandleKeyPress"
+               placeholder="Add new todo..." 
+               class="todo-input" />
+        <button @onclick="AddTodo" class="add-button">Add</button>
+    </div>
+
+    @if (todos.Count == 0)
+    {
+        <p>No todos yet. Add your first task!</p>
+    }
+    else
+    {
+        <ul class="todo-list">
+            @foreach (var todo in todos)
+            {
+                <li class="todo-item">
+                    <input type="checkbox" 
+                           checked="@todo.IsComplete"
+                           @onchange="(_) => UpdateCompleteStatus(todo)" 
+                           class="todo-checkbox" />
+                    <span class="todo-text @(todo.IsComplete ? "completed" : "")">
+                        @todo.Title
+                    </span>
+                    <button @onclick="() => DeleteTodo(todo)" class="delete-button">✕</button>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private List<TodoApp.Services.TodoItem> todos = new();
+    private string newTodoTitle = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTodos();
+    }
+
+    private async Task LoadTodos()
+    {
+        todos = (await TodoService.GetTodosAsync()).ToList();
+    }
+
+    private async Task AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodoTitle))
+        {
+            await TodoService.AddTodoAsync(newTodoTitle.Trim());
+            newTodoTitle = string.Empty;
+            await LoadTodos();
+        }
+    }
+
+    private async Task UpdateCompleteStatus(TodoApp.Services.TodoItem todo)
+    {
+        todo.IsComplete = !todo.IsComplete;
+        await TodoService.UpdateTodoAsync(todo);
+    }
+
+    private async Task DeleteTodo(TodoApp.Services.TodoItem todo)
+    {
+        await TodoService.DeleteTodoAsync(todo.Id);
+        await LoadTodos();
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await AddTodo();
+    }
+    
+    public void Dispose() { }
+}
