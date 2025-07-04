@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace TodoApp.Services;
+namespace TodoApp.Data;
 
 public class TodoItem
 {

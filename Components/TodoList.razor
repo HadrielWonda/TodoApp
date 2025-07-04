@@ -1,4 +1,4 @@
-@using TodoApp.Services
+@using TodoApp.Data
 @inject TodoService TodoService
 @implements IDisposable
 
@@ -36,7 +36,7 @@
 </div>
 
 @code {
-    private List<TodoApp.Services.TodoItem> todos = new();
+    private List<TodoApp.Data.TodoItem> todos = new();
     private string newTodoTitle = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -59,13 +59,13 @@
         }
     }
 
-    private async Task UpdateCompleteStatus(TodoApp.Services.TodoItem todo)
+    private async Task UpdateCompleteStatus(TodoApp.Data.TodoItem todo)
     {
         todo.IsComplete = !todo.IsComplete;
         await TodoService.UpdateTodoAsync(todo);
     }
 
-    private async Task DeleteTodo(TodoApp.Services.TodoItem todo)
+    private async Task DeleteTodo(TodoApp.Data.TodoItem todo)
     {
         await TodoService.DeleteTodoAsync(todo.Id);
         await LoadTodos();
